@@ -26,6 +26,7 @@
 #include <linux/msm-bus-board.h>
 
 #include "msm_buf_mgr.h"
+#include "cam_hw_ops.h"
 
 #define VFE40_8974V1_VERSION 0x10000018
 #define VFE40_8974V2_VERSION 0x1001001A
@@ -241,6 +242,8 @@ struct msm_vfe_core_ops {
 	void (*set_halt_restart_mask)(struct vfe_device *vfe_dev);
 	int (*start_fetch_eng_multi_pass)(struct vfe_device *vfe_dev,
 		void *arg);
+	int (*ahb_clk_cfg)(struct vfe_device *vfe_dev,
+			struct msm_isp_ahb_clk_cfg *ahb_cfg);
 };
 struct msm_vfe_stats_ops {
 	int (*get_stats_idx)(enum msm_isp_stats_type stats_type);
@@ -673,7 +676,11 @@ struct vfe_device {
 	struct regulator *fs_camss;
 	struct regulator *fs_mmagic_camss;
 	struct clk **vfe_clk;
+	struct msm_cam_clk_info *vfe_clk_info;
+	uint32_t **vfe_clk_rates;
 	uint32_t num_clk;
+	size_t num_rates;
+	enum cam_ahb_clk_vote ahb_vote;
 
 	/* Sync variables*/
 	struct completion reset_complete;

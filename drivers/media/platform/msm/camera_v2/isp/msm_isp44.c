@@ -2046,7 +2046,7 @@ struct msm_vfe_hardware_info vfe44_hw_info = {
 				msm_vfe44_is_module_cfg_lock_needed,
 			.set_halt_restart_mask =
 				msm_vfe44_set_halt_restart_mask,
-
+			.ahb_clk_cfg = NULL,
 		},
 		.stats_ops = {
 			.get_stats_idx = msm_vfe44_get_stats_idx,

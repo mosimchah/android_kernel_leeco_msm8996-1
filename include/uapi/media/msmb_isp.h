@@ -988,4 +988,8 @@ enum msm_isp_ioctl_cmd_code {
 #define VIDIOC_MSM_ISP_MAP_BUF_START_MULTI_PASS_FE \
 	_IOWR('V', MSM_ISP_MAP_BUF_START_MULTI_PASS_FE, \
 		struct msm_vfe_fetch_eng_multi_pass_start)
+
+#define VIDIOC_MSM_ISP_AHB_CLK_CFG \
+	_IOWR('V', BASE_VIDIOC_PRIVATE+25, struct msm_isp_ahb_clk_cfg)
+
 #endif /* __MSMB_ISP__ */
