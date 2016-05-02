@@ -1055,6 +1055,7 @@ static int msm_ispif_stop_immediately(struct ispif_device *ispif,
 			cid_mask, params->entries[i].vfe_intf, 0);
 	}
 
+	rc = msm_ispif_reset_hw(ispif);
 	return rc;
 }
 
@@ -1086,9 +1087,12 @@ static int msm_ispif_restart_frame_boundary(struct ispif_device *ispif,
 	int rc = 0;
 
 	rc = msm_ispif_reset_hw(ispif);
-	if (!rc) rc = msm_ispif_reset(ispif);
-	if (!rc) rc = msm_ispif_config(ispif, params);
-	if (!rc) rc = msm_ispif_start_frame_boundary(ispif, params);
+	if (!rc)
+		rc = msm_ispif_reset(ispif);
+	if (!rc)
+		rc = msm_ispif_config(ispif, params);
+	if (!rc)
+		rc = msm_ispif_start_frame_boundary(ispif, params);
 
 	if (!rc)
 		pr_info("ISPIF restart Successful\n");
@@ -1170,7 +1174,7 @@ static int msm_ispif_stop_frame_boundary(struct ispif_device *ispif,
 					ISPIF_TIMEOUT_SLEEP_US,
 					ISPIF_TIMEOUT_ALL_US);
 		if (rc < 0)
-			goto end;
+			pr_err("ISPIF stop frame boundary timeout\n");
 
 		/* disable CIDs in CID_MASK register */
 		msm_ispif_enable_intf_cids(ispif, params->entries[i].intftype,
@@ -1178,6 +1182,7 @@ static int msm_ispif_stop_frame_boundary(struct ispif_device *ispif,
 	}
 
 end:
+	rc = msm_ispif_reset_hw(ispif);
 	return rc;
 }
 

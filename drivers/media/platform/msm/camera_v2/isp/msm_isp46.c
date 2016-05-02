@@ -1606,10 +1606,10 @@ static int msm_vfe46_axi_restart(struct vfe_device *vfe_dev,
 
 	vfe_dev->hw_info->vfe_ops.core_ops.reg_update(vfe_dev, VFE_SRC_MAX);
 
-	if (enable_camif)
+	if (enable_camif) {
 		vfe_dev->hw_info->vfe_ops.core_ops.
 		update_camif_state(vfe_dev, ENABLE_CAMIF);
-
+        }
 	return 0;
 }
 
@@ -2152,6 +2152,8 @@ struct msm_vfe_hardware_info vfe46_hw_info = {
 			.set_halt_restart_mask =
 				msm_vfe46_set_halt_restart_mask,
 			.ahb_clk_cfg = NULL,
+			.set_halt_restart_mask =
+				msm_vfe46_set_halt_restart_mask,
 		},
 		.stats_ops = {
 			.get_stats_idx = msm_vfe46_get_stats_idx,

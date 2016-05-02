@@ -1994,7 +1994,8 @@ static void msm_isp_process_overflow_irq(
 				ISP_VFE1 : ISP_VFE0;
 
 			atomic_cmpxchg(&(vfe_dev->common_data->dual_vfe_res->
-				vfe_dev[other_vfe_id]->error_info.overflow_state),
+				vfe_dev[other_vfe_id]->
+				error_info.overflow_state),
 				NO_OVERFLOW, OVERFLOW_DETECTED);
 
 			vfe_dev->hw_info->vfe_ops.core_ops.

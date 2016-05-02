@@ -1525,8 +1525,8 @@ static void msm_vfe40_update_camif_state(struct vfe_device *vfe_dev,
 	} else if (update_state == DISABLE_CAMIF ||
 		DISABLE_CAMIF_IMMEDIATELY == update_state) {
 		vfe_dev->irq1_mask &= ~0x81;
-		msm_vfe40_config_irq(vfe_dev, vfe_dev->irq0_mask, vfe_dev->irq1_mask,
-			MSM_ISP_IRQ_SET);
+		msm_vfe40_config_irq(vfe_dev, vfe_dev->irq0_mask,
+			vfe_dev->irq1_mask, MSM_ISP_IRQ_SET);
 		val = msm_camera_io_r(vfe_dev->vfe_base + 0x464);
 		/* disable danger signal */
 		msm_camera_io_w_mb(val & ~(1 << 8), vfe_dev->vfe_base + 0x464);
@@ -2406,6 +2406,8 @@ struct msm_vfe_hardware_info vfe40_hw_info = {
 			.set_halt_restart_mask =
 				msm_vfe40_set_halt_restart_mask,
 			.ahb_clk_cfg = NULL,
+			.set_halt_restart_mask =
+				msm_vfe40_set_halt_restart_mask,
 		},
 		.stats_ops = {
 			.get_stats_idx = msm_vfe40_get_stats_idx,

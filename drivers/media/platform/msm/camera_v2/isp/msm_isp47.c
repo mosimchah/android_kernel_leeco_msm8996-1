@@ -1436,8 +1436,10 @@ static void msm_vfe47_update_camif_state(struct vfe_device *vfe_dev,
 		msm_camera_io_w(1 << 0, vfe_dev->vfe_base + 0x68);
 		msm_camera_io_w_mb(1, vfe_dev->vfe_base + 0x58);
 		vfe_dev->irq0_mask |= 0xF5;
+		vfe_dev->irq1_mask |= 0x81;
+
 		msm_vfe47_config_irq(vfe_dev, vfe_dev->irq0_mask,
-					vfe_dev->irq1_mask, MSM_ISP_IRQ_SET);
+			vfe_dev->irq1_mask, MSM_ISP_IRQ_SET);
 
 		if ((vfe_dev->hvx_cmd > HVX_DISABLE) &&
 			(vfe_dev->hvx_cmd <= HVX_ROUND_TRIP))
@@ -1463,8 +1465,10 @@ static void msm_vfe47_update_camif_state(struct vfe_device *vfe_dev,
 			msm_camera_io_w(1, vfe_dev->vfe_base + 0xC58);
 	} else if (update_state == DISABLE_CAMIF ||
 		update_state == DISABLE_CAMIF_IMMEDIATELY) {
-		/* turn off all irq before camif disable */
-		msm_vfe47_config_irq(vfe_dev, 0, 0, MSM_ISP_IRQ_SET);
+		/* turn off camif violation and error irqs */
+		vfe_dev->irq1_mask &= ~0x81;
+		msm_vfe47_config_irq(vfe_dev, vfe_dev->irq0_mask,
+			vfe_dev->irq1_mask, MSM_ISP_IRQ_SET);
 		val = msm_camera_io_r(vfe_dev->vfe_base + 0x464);
 		/* disable danger signal */
 		msm_camera_io_w_mb(val & ~(1 << 8), vfe_dev->vfe_base + 0x464);
@@ -1478,16 +1482,6 @@ static void msm_vfe47_update_camif_state(struct vfe_device *vfe_dev,
 		if ((vfe_dev->hvx_cmd > HVX_DISABLE) &&
 			(vfe_dev->hvx_cmd <= HVX_ROUND_TRIP))
 			msm_vfe47_configure_hvx(vfe_dev, 0);
-		/*
-		 * restore the irq that were disabled for camif stop and clear
-		 * the camif error interrupts if generated during that period
-		 */
-		msm_camera_io_w(0, vfe_dev->vfe_base + 0x64);
-		msm_camera_io_w(1 << 0, vfe_dev->vfe_base + 0x68);
-		msm_camera_io_w_mb(1, vfe_dev->vfe_base + 0x58);
-		msm_vfe47_config_irq(vfe_dev, vfe_dev->irq0_mask,
-					vfe_dev->irq1_mask, MSM_ISP_IRQ_SET);
-
 	}
 }
 
@@ -1749,7 +1743,7 @@ static void msm_vfe47_set_halt_restart_mask(struct vfe_device *vfe_dev)
 	msm_vfe47_config_irq(vfe_dev, BIT(31), BIT(8), MSM_ISP_IRQ_SET);
 }
 
-static int msm_vfe47_axi_halt(struct vfe_device *vfe_dev,
+int msm_vfe47_axi_halt(struct vfe_device *vfe_dev,
 	uint32_t blocking)
 {
 	int rc = 0;
@@ -1838,10 +1832,10 @@ static int msm_vfe47_axi_restart(struct vfe_device *vfe_dev,
 
 	vfe_dev->hw_info->vfe_ops.core_ops.reg_update(vfe_dev, VFE_SRC_MAX);
 
-	if (enable_camif)
+	if (enable_camif) {
 		vfe_dev->hw_info->vfe_ops.core_ops.
 		update_camif_state(vfe_dev, ENABLE_CAMIF);
-
+        }
 	return 0;
 }
 
@@ -2428,6 +2422,8 @@ struct msm_vfe_hardware_info vfe47_hw_info = {
 			.set_halt_restart_mask =
 				msm_vfe47_set_halt_restart_mask,
 			.ahb_clk_cfg = msm_isp47_ahb_clk_cfg,
+			.set_halt_restart_mask =
+				msm_vfe47_set_halt_restart_mask,
 		},
 		.stats_ops = {
 			.get_stats_idx = msm_vfe47_get_stats_idx,
