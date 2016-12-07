@@ -1369,7 +1369,7 @@ static int msm_ec_ref_ch_put(struct snd_kcontrol *kcontrol,
 {
 	msm_ec_ref_ch = ucontrol->value.integer.value[0];
 	pr_debug("%s: msm_ec_ref_ch = %d\n", __func__, msm_ec_ref_ch);
-	adm_num_ec_ref_rx_chans(msm_ec_ref_ch);
+	//adm_num_ec_ref_rx_chans(msm_ec_ref_ch);
 	return 0;
 }
 
@@ -1408,7 +1408,7 @@ static int msm_ec_ref_bit_format_put(struct snd_kcontrol *kcontrol,
 	}
 	pr_debug("%s: msm_ec_ref_bit_format = %d\n",
 		 __func__, msm_ec_ref_bit_format);
-	adm_ec_ref_rx_bit_width(msm_ec_ref_bit_format);
+	//adm_ec_ref_rx_bit_width(msm_ec_ref_bit_format);
 	return 0;
 }
 
@@ -1458,7 +1458,7 @@ static int msm_ec_ref_rate_put(struct snd_kcontrol *kcontrol,
 	}
 	pr_debug("%s: msm_ec_ref_sampling_rate = %d\n",
 		 __func__, msm_ec_ref_sampling_rate);
-	adm_ec_ref_rx_sampling_rate(msm_ec_ref_sampling_rate);
+	//adm_ec_ref_rx_sampling_rate(msm_ec_ref_sampling_rate);
 	return 0;
 }
 

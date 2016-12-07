@@ -886,4 +886,10 @@ config SND_SOC_TFA98XX
 	help
 	  Say Y here to enable Audio SMART PA support. This allows
 	  monitoring switches by userspace via sysfs and uevent.
+
+config SND_SOC_MAX98927
+	tristate "Audio SMART PA 98927 support"
+	help
+	  Say Y here to enable Audio SMART PA support. This allows
+	  monitoring switches by userspace via sysfs and uevent.
 endmenu
