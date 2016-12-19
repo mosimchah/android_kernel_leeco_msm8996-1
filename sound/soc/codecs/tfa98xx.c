@@ -46,6 +46,8 @@
 #include "tfa_service.h"
 #include "tfa_container.h"
 #include "tfa98xx_parameters.h"
+int testLogOn = 0;
+EXPORT_SYMBOL_GPL(testLogOn);
 
 #define TFA98XX_VERSION		"2.10.1-a"
 
