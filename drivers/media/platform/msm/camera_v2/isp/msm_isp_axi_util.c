@@ -1632,6 +1632,82 @@ static struct msm_isp_buffer *msm_isp_get_stream_buffer(
 	return buf;
 }
 
+int msm_isp_cfg_offline_ping_pong_address(struct vfe_device *vfe_dev,
+	struct msm_vfe_axi_stream *stream_info, uint32_t pingpong_status,
+	uint32_t buf_idx)
+{
+	int i, rc = 0;
+	struct msm_isp_buffer *buf = NULL;
+	uint32_t pingpong_bit;
+	uint32_t stream_idx = HANDLE_TO_IDX(stream_info->stream_handle);
+	uint32_t buffer_size_byte = 0;
+	int32_t word_per_line = 0;
+	dma_addr_t paddr;
+	uint32_t bufq_handle = 0;
+
+	if (stream_idx >= VFE_AXI_SRC_MAX) {
+		pr_err("%s: Invalid stream_idx", __func__);
+		return -EINVAL;
+	}
+
+	bufq_handle = stream_info->bufq_handle[VFE_BUF_QUEUE_DEFAULT];
+
+	if (!vfe_dev->is_split) {
+		rc = vfe_dev->buf_mgr->ops->get_buf_by_index(
+			vfe_dev->buf_mgr, bufq_handle, buf_idx, &buf);
+		if (rc < 0 || !buf) {
+			pr_err("%s: No fetch buffer rc= %d\n",
+				__func__, rc);
+			return -EINVAL;
+		}
+
+		if (buf->num_planes != stream_info->num_planes) {
+			pr_err("%s: Invalid buffer\n", __func__);
+			vfe_dev->buf_mgr->ops->put_buf(vfe_dev->buf_mgr,
+				bufq_handle, buf->buf_idx);
+			return -EINVAL;
+		}
+
+		pingpong_bit = ((pingpong_status >>
+			stream_info->wm[0]) & 0x1);
+
+		for (i = 0; i < stream_info->num_planes; i++) {
+			word_per_line = msm_isp_cal_word_per_line(
+				stream_info->output_format,
+				stream_info->plane_cfg[i].
+				output_stride);
+			if (word_per_line < 0) {
+				/* 0 means no prefetch*/
+				word_per_line = 0;
+				buffer_size_byte = 0;
+			} else {
+				buffer_size_byte = (word_per_line * 8 *
+					stream_info->plane_cfg[i].
+					output_scan_lines) -
+					stream_info->
+					plane_cfg[i].plane_addr_offset;
+			}
+			paddr = buf->mapped_info[i].paddr;
+
+			vfe_dev->hw_info->vfe_ops.axi_ops.
+				update_ping_pong_addr(
+				vfe_dev->vfe_base, stream_info->wm[i],
+				pingpong_bit, paddr +
+				stream_info->
+				plane_cfg[i].plane_addr_offset,
+				buffer_size_byte);
+
+			if (0 == i) {
+				stream_info->buf[!pingpong_bit] = buf;
+				buf->pingpong_bit = !pingpong_bit;
+			}
+			buf->state = MSM_ISP_BUFFER_STATE_DEQUEUED;
+		}
+	}
+	return rc;
+
+}
+
 static int msm_isp_cfg_ping_pong_address(struct vfe_device *vfe_dev,
 	struct msm_vfe_axi_stream *stream_info, uint32_t pingpong_status,
 	int scratch)
